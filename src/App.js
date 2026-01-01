@@ -5,16 +5,39 @@ import Chat from './pages/Chat'
 import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/AdminDashboard'
 import AdminPackages from './pages/AdminPackages'
+import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+
+        {/* ===== PUBLIC ===== */}
         <Route path="/" element={<Home />} />
         <Route path="/chat" element={<Chat />} />
+
+        {/* ===== ADMIN LOGIN ===== */}
         <Route path="/admin" element={<AdminLogin />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/packages" element={<AdminPackages />} />
+
+        {/* ===== ADMIN PROTECTED ===== */}
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/packages"
+          element={
+            <ProtectedRoute>
+              <AdminPackages />
+            </ProtectedRoute>
+          }
+        />
+
       </Routes>
     </BrowserRouter>
   )

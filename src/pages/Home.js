@@ -1,4 +1,12 @@
+import { useNavigate } from 'react-router-dom'
+
 export default function Home() {
+  const navigate = useNavigate()
+
+  const handleOrder = () => {
+    navigate('/chat')
+  }
+
   return (
     <div>
       <h1>Cyber Check Service</h1>
@@ -6,7 +14,9 @@ export default function Home() {
 
       <div>
         <h3>Paket Basic</h3>
-        <button>Pesan Sekarang</button>
+        <button onClick={handleOrder}>
+          Pesan Sekarang
+        </button>
       </div>
     </div>
   )

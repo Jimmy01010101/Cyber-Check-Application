@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
+import './styles/hacker.css'
+
 import Home from './pages/Home'
 import Chat from './pages/Chat'
 import AdminLogin from './pages/AdminLogin'

@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabase'
-import { useNavigate } from 'react-router-dom'
+import AdminSidebar from '../components/AdminSidebar'
 
 export default function AdminPackages() {
-  const navigate = useNavigate()
-
   const [packages, setPackages] = useState([])
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
-  const [editId, setEditId] = useState(null)
 
-  // ===== AMBIL DATA =====
+  useEffect(() => {
+    fetchPackages()
+  }, [])
+
   const fetchPackages = async () => {
     const { data } = await supabase
       .from('packages')
@@ -21,126 +21,60 @@ export default function AdminPackages() {
     setPackages(data || [])
   }
 
-  useEffect(() => {
-    fetchPackages()
-  }, [])
-
-  // ===== SIMPAN / UPDATE =====
   const savePackage = async () => {
-    if (!name || !price) {
-      alert('Nama dan harga wajib diisi')
-      return
-    }
+    if (!name || !description || !price) return
 
-    if (editId) {
-      await supabase
-        .from('packages')
-        .update({ name, description, price })
-        .eq('id', editId)
-    } else {
-      await supabase
-        .from('packages')
-        .insert({ name, description, price })
-    }
+    await supabase.from('packages').insert([
+      { name, description, price }
+    ])
 
-    resetForm()
-    fetchPackages()
-  }
-
-  const editPackage = (pkg) => {
-    setEditId(pkg.id)
-    setName(pkg.name)
-    setDescription(pkg.description)
-    setPrice(pkg.price)
-  }
-
-  const deletePackage = async (id) => {
-    if (!window.confirm('Hapus paket ini?')) return
-
-    await supabase
-      .from('packages')
-      .delete()
-      .eq('id', id)
-
-    fetchPackages()
-  }
-
-  const resetForm = () => {
-    setEditId(null)
     setName('')
     setDescription('')
     setPrice('')
+    fetchPackages()
   }
 
   return (
-    <div style={{ maxWidth: '800px', margin: '20px auto' }}>
+    <>
+      <AdminSidebar />
 
-      {/* ===== MENU ADMIN ===== */}
-      <div style={{ marginBottom: '15px' }}>
-        <button onClick={() => navigate('/admin/dashboard')}>
-          Dashboard Chat
-        </button>
-        <button
-          style={{ marginLeft: '10px' }}
-          onClick={() => navigate('/admin/packages')}
-        >
-          Paket Keamanan
-        </button>
-      </div>
+      <div className="admin-content">
+        <h2>SECURITY PACKAGES</h2>
 
-      <h2>Manajemen Paket Keamanan</h2>
+        {/* FORM */}
+        <div className="card">
+          <input
+            placeholder="Package name"
+            value={name}
+            onChange={e => setName(e.target.value)}
+          />
 
-      {/* FORM */}
-      <div style={{ border: '1px solid #ccc', padding: '10px' }}>
-        <input
-          placeholder="Nama Paket"
-          value={name}
-          onChange={e => setName(e.target.value)}
-        /><br /><br />
+          <textarea
+            placeholder="Description"
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+          />
 
-        <textarea
-          placeholder="Deskripsi"
-          value={description}
-          onChange={e => setDescription(e.target.value)}
-        /><br /><br />
+          <input
+            placeholder="Price"
+            value={price}
+            onChange={e => setPrice(e.target.value)}
+          />
 
-        <input
-          placeholder="Harga"
-          value={price}
-          onChange={e => setPrice(e.target.value)}
-        /><br /><br />
-
-        <button onClick={savePackage}>
-          {editId ? 'Update' : 'Tambah'}
-        </button>
-
-        {editId && (
-          <button onClick={resetForm} style={{ marginLeft: '10px' }}>
-            Batal
-          </button>
-        )}
-      </div>
-
-      <hr />
-
-      {/* LIST */}
-      <h3>Daftar Paket</h3>
-
-      {packages.map(pkg => (
-        <div key={pkg.id} style={{ borderBottom: '1px solid #eee', marginBottom: '10px' }}>
-          <h4>{pkg.name}</h4>
-          <p>{pkg.description}</p>
-          <strong>{pkg.price}</strong><br />
-
-          <button onClick={() => editPackage(pkg)}>Edit</button>
-          <button
-            onClick={() => deletePackage(pkg.id)}
-            style={{ marginLeft: '10px' }}
-          >
-            Hapus
+          <button onClick={savePackage} style={{ marginTop: '10px' }}>
+            SAVE
           </button>
         </div>
-      ))}
-    </div>
+
+        {/* LIST */}
+        {packages.map(pkg => (
+          <div key={pkg.id} className="card">
+            <h3>{pkg.name}</h3>
+            <p>{pkg.description}</p>
+            <strong>{pkg.price}</strong>
+          </div>
+        ))}
+      </div>
+    </>
   )
 }

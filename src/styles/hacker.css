@@ -1,0 +1,255 @@
+/* ===============================
+   GLOBAL RESET & FONT
+================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Courier New', monospace;
+}
+
+body {
+  background: radial-gradient(circle at top, #020617, #000000);
+  color: #e5e7eb;
+  min-height: 100vh;
+}
+
+/* ===============================
+   TYPOGRAPHY
+================================ */
+h1, h2, h3, h4 {
+  color: #00ff9c;
+  text-shadow: 0 0 8px rgba(0,255,156,0.6);
+  margin-bottom: 12px;
+}
+
+p {
+  line-height: 1.6;
+  color: #cbd5f5;
+}
+
+/* ===============================
+   LINKS
+================================ */
+a {
+  color: #38bdf8;
+  text-decoration: none;
+}
+
+a:hover {
+  text-shadow: 0 0 6px #38bdf8;
+}
+
+/* ===============================
+   BUTTON
+================================ */
+button {
+  background: transparent;
+  border: 1px solid #00ff9c;
+  color: #00ff9c;
+  padding: 8px 16px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background: #00ff9c;
+  color: #020617;
+  box-shadow: 0 0 15px #00ff9c;
+}
+
+/* ===============================
+   INPUT & TEXTAREA
+================================ */
+input, textarea {
+  width: 100%;
+  background: #020617;
+  border: 1px solid #1f2937;
+  color: #00ff9c;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #64748b;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56,189,248,0.7);
+}
+
+/* ===============================
+   CARD / PANEL
+================================ */
+.card {
+  background: rgba(2,6,23,0.85);
+  border: 1px solid #1f2937;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.6);
+}
+
+/* ===============================
+   MENU / NAV
+================================ */
+.menu {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 25px;
+  border-bottom: 1px solid #1f2937;
+  padding-bottom: 10px;
+}
+
+/* ===============================
+   CHAT UI
+================================ */
+.chat-box {
+  height: 320px;
+  background: #020617;
+  border: 1px solid #1f2937;
+  padding: 12px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+
+.chat-client {
+  color: #00ff9c;
+}
+
+.chat-admin {
+  color: #38bdf8;
+}
+
+.chat-box p {
+  margin-bottom: 6px;
+}
+
+/* ===============================
+   CLIENT LIST (ADMIN)
+================================ */
+.client-item {
+  padding: 10px;
+  border-bottom: 1px solid #1f2937;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.client-item:hover {
+  background: #020617;
+  color: #38bdf8;
+}
+
+/* ===============================
+   PAGE LAYOUT HELPERS
+================================ */
+.center-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 30px;
+}
+
+/* ===============================
+   HOME PAGE (OPTIONAL)
+================================ */
+.home-hero {
+  text-align: center;
+  margin-top: 100px;
+}
+
+.home-hero h1 {
+  font-size: 2.5rem;
+}
+
+.home-hero p {
+  max-width: 600px;
+  margin: 15px auto;
+}
+
+/* ===============================
+   SCROLLBAR (HACKER STYLE)
+================================ */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #020617;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #00ff9c;
+}
+
+
+/* ===============================
+   SIDEBAR ADMIN
+================================ */
+.sidebar {
+  width: 220px;
+  background: linear-gradient(180deg, #020617, #000);
+  border-right: 1px solid #1f2937;
+  min-height: 100vh;
+  padding: 20px 15px;
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+
+.sidebar h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 18px;
+}
+
+.sidebar a {
+  display: block;
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  border: 1px solid #1f2937;
+  color: #00ff9c;
+  letter-spacing: 1px;
+  transition: 0.3s;
+}
+
+.sidebar a:hover {
+  background: #00ff9c;
+  color: #020617;
+  box-shadow: 0 0 15px #00ff9c;
+}
+
+.sidebar .active {
+  background: #020617;
+  border-color: #38bdf8;
+  color: #38bdf8;
+  box-shadow: 0 0 10px #38bdf8;
+}
+
+/* ===============================
+   ADMIN CONTENT SHIFT
+================================ */
+.admin-content {
+  margin-left: 240px;
+  padding: 30px;
+}
+
+.badge {
+  background: red;
+  color: white;
+  font-size: 12px;
+  padding: 2px 7px;
+  border-radius: 50%;
+  margin-left: 8px;
+  box-shadow: 0 0 8px red;
+}

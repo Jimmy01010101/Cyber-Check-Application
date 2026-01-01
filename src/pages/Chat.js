@@ -46,14 +46,15 @@ export default function Chat() {
     }
   }, [])
 
-  // === KIRIM PESAN ===
+  // === KIRIM PESAN CLIENT ===
   const sendMessage = async () => {
     if (!newMessage.trim()) return
 
     await supabase.from('messages').insert({
       client_id: clientId,
       sender: 'client',
-      message: newMessage
+      message: newMessage,
+      is_read: false // 🔔 INI PENTING UNTUK NOTIFIKASI ADMIN
     })
 
     setNewMessage('')
@@ -62,15 +63,18 @@ export default function Chat() {
   return (
     <div style={{ maxWidth: 600, margin: '20px auto' }}>
       <h2>Chat dengan Admin</h2>
+
       <button onClick={() => navigate('/')}>← Kembali</button>
 
-      <div style={{
-        border: '1px solid #ccc',
-        height: 300,
-        padding: 10,
-        overflowY: 'auto',
-        marginTop: 10
-      }}>
+      <div
+        style={{
+          border: '1px solid #ccc',
+          height: 300,
+          padding: 10,
+          overflowY: 'auto',
+          marginTop: 10
+        }}
+      >
         {messages.map(m => (
           <p key={m.id}>
             <strong>{m.sender}:</strong> {m.message}

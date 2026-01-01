@@ -7,6 +7,7 @@ import Chat from './pages/Chat'
 import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/AdminDashboard'
 import AdminPackages from './pages/AdminPackages'
+import Packages from './pages/Packages'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
 
         {/* ===== PUBLIC ===== */}
         <Route path="/" element={<Home />} />
+        <Route path="/packages" element={<Packages />} />
         <Route path="/chat" element={<Chat />} />
 
         {/* ===== ADMIN LOGIN ===== */}

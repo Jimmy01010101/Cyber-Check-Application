@@ -280,3 +280,7 @@ textarea:focus {
   letter-spacing: 1px;
   color: #aaa;
 }
+
+canvas {
+  max-height: 300px;
+}

@@ -2,69 +2,106 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../supabase'
 import AdminSidebar from '../components/AdminSidebar'
 
+// CHART
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js'
+import { Bar } from 'react-chartjs-2'
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+)
+
 export default function AdminDashboard() {
   const [clients, setClients] = useState([])
   const [messages, setMessages] = useState([])
   const [selectedClient, setSelectedClient] = useState(null)
-  const [reply, setReply] = useState('')
-
-  const [stats, setStats] = useState({
-    totalClients: 0,
-    totalMessages: 0,
-    unreadMessages: 0,
-    todayMessages: 0
-  })
+  const [reply, setReply] = useState([])
+  const [stats, setStats] = useState({})
+  const [chartData, setChartData] = useState(null)
 
   useEffect(() => {
-    fetchClients()
     fetchStats()
+    fetchClients()
+    fetchChart()
   }, [])
 
-  // === STATISTIK ADMIN ===
+  // === STATISTIK ===
   const fetchStats = async () => {
     const today = new Date().toISOString().split('T')[0]
 
-    const { data: allMessages } = await supabase
+    const { data } = await supabase
       .from('messages')
       .select('client_id, sender, is_read, created_at')
 
-    if (!allMessages) return
+    if (!data) return
 
-    const uniqueClients = new Set(allMessages.map(m => m.client_id))
-    const unread = allMessages.filter(
-      m => m.sender === 'client' && m.is_read === false
-    )
-    const todayMsgs = allMessages.filter(
-      m => m.created_at.startsWith(today)
-    )
+    const uniqueClients = new Set(data.map(d => d.client_id))
+    const unread = data.filter(d => d.sender === 'client' && !d.is_read)
+    const todayMsg = data.filter(d => d.created_at.startsWith(today))
 
     setStats({
       totalClients: uniqueClients.size,
-      totalMessages: allMessages.length,
+      totalMessages: data.length,
       unreadMessages: unread.length,
-      todayMessages: todayMsgs.length
+      todayMessages: todayMsg.length
     })
   }
 
-  // === CLIENT LIST + UNREAD PER CLIENT ===
+  // === CLIENT LIST ===
   const fetchClients = async () => {
     const { data } = await supabase
       .from('messages')
       .select('client_id, sender, is_read')
 
-    if (!data) return
-
     const map = {}
-    data.forEach(msg => {
-      if (!map[msg.client_id]) map[msg.client_id] = 0
-      if (msg.sender === 'client' && !msg.is_read) {
-        map[msg.client_id]++
-      }
+    data?.forEach(m => {
+      if (!map[m.client_id]) map[m.client_id] = 0
+      if (m.sender === 'client' && !m.is_read) map[m.client_id]++
     })
 
-    setClients(
-      Object.entries(map).map(([id, unread]) => ({ id, unread }))
+    setClients(Object.entries(map).map(([id, unread]) => ({ id, unread })))
+  }
+
+  // === GRAFIK PESAN 7 HARI ===
+  const fetchChart = async () => {
+    const { data } = await supabase
+      .from('messages')
+      .select('created_at')
+
+    if (!data) return
+
+    const days = [...Array(7)].map((_, i) => {
+      const d = new Date()
+      d.setDate(d.getDate() - (6 - i))
+      return d.toISOString().split('T')[0]
+    })
+
+    const counts = days.map(day =>
+      data.filter(m => m.created_at.startsWith(day)).length
     )
+
+    setChartData({
+      labels: days.map(d => d.slice(5)),
+      datasets: [
+        {
+          label: 'Messages',
+          data: counts,
+          backgroundColor: '#00ff88'
+        }
+      ]
+    })
   }
 
   // === OPEN CHAT ===
@@ -79,7 +116,6 @@ export default function AdminDashboard() {
 
     setMessages(data || [])
 
-    // tandai sudah dibaca
     await supabase
       .from('messages')
       .update({ is_read: true })
@@ -116,26 +152,29 @@ export default function AdminDashboard() {
         <div className="stats-grid">
           <div className="stat-card">
             <h3>{stats.totalClients}</h3>
-            <p>Total Clients</p>
+            <p>Clients</p>
           </div>
-
           <div className="stat-card">
             <h3>{stats.totalMessages}</h3>
-            <p>Total Messages</p>
+            <p>Messages</p>
           </div>
-
           <div className="stat-card">
             <h3>{stats.unreadMessages}</h3>
-            <p>Unread Messages</p>
+            <p>Unread</p>
           </div>
-
           <div className="stat-card">
             <h3>{stats.todayMessages}</h3>
-            <p>Messages Today</p>
+            <p>Today</p>
           </div>
         </div>
 
-        {/* === CHAT PANEL === */}
+        {/* === GRAFIK === */}
+        <div className="card">
+          <h3>Message Activity (7 Days)</h3>
+          {chartData && <Bar data={chartData} />}
+        </div>
+
+        {/* === CHAT === */}
         <div style={{ display: 'flex', marginTop: 20 }}>
           <div className="card" style={{ width: '30%' }}>
             <h3>Clients</h3>
@@ -146,9 +185,7 @@ export default function AdminDashboard() {
                 onClick={() => fetchMessages(c.id)}
               >
                 {c.id.slice(0, 8)}...
-                {c.unread > 0 && (
-                  <span className="badge">{c.unread}</span>
-                )}
+                {c.unread > 0 && <span className="badge">{c.unread}</span>}
               </div>
             ))}
           </div>
@@ -168,9 +205,9 @@ export default function AdminDashboard() {
             </div>
 
             <input
-              placeholder="secure reply..."
               value={reply}
               onChange={e => setReply(e.target.value)}
+              placeholder="secure reply..."
             />
             <button onClick={sendReply}>SEND</button>
           </div>

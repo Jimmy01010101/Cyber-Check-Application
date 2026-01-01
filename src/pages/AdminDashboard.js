@@ -141,6 +141,19 @@ export default function AdminDashboard() {
     fetchMessages(selectedClient)
   }
 
+  const deleteMessage = async (id) => {
+  const ok = window.confirm('Hapus pesan ini secara permanen?')
+  if (!ok) return
+
+  await supabase
+    .from('messages')
+    .delete()
+    .eq('id', id)
+
+  fetchMessages(selectedClient)
+}
+
+
   return (
     <>
       <AdminSidebar />
@@ -192,18 +205,42 @@ export default function AdminDashboard() {
 
           <div className="card" style={{ width: '70%', marginLeft: 15 }}>
             <div className="chat-box">
-              {messages.map(m => (
-                <p
-                  key={m.id}
-                  className={m.sender === 'admin'
-                    ? 'chat-admin'
-                    : 'chat-client'}
-                >
-                  <strong>{m.sender}:</strong> {m.message}
-                </p>
-              ))}
-            </div>
+  {messages.map(m => (
+    <div
+      key={m.id}
+      className={`bubble ${m.sender === 'admin'
+        ? 'chat-admin'
+        : 'chat-client'}`}
+    >
+      {/* TEXT */}
+      {m.message && (
+        <div>
+          <strong>{m.sender}:</strong> {m.message}
+        </div>
+      )}
 
+      {/* FILE ZIP */}
+      {m.file_url && (
+        <a
+          href={m.file_url}
+          target="_blank"
+          rel="noreferrer"
+          className="file-link"
+        >
+          📦 Download {m.file_name}
+        </a>
+      )}
+
+      {/* DELETE BUTTON */}
+      <button
+        className="delete-btn"
+        onClick={() => deleteMessage(m.id)}
+      >
+        🗑 Hapus
+      </button>
+    </div>
+  ))}
+</div>
             <input
               value={reply}
               onChange={e => setReply(e.target.value)}

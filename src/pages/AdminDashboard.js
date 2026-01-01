@@ -7,29 +7,50 @@ export default function AdminDashboard() {
   const [messages, setMessages] = useState([])
   const [selectedClient, setSelectedClient] = useState(null)
   const [reply, setReply] = useState('')
-  const [unreadTotal, setUnreadTotal] = useState(0)
+
+  const [stats, setStats] = useState({
+    totalClients: 0,
+    totalMessages: 0,
+    unreadMessages: 0,
+    todayMessages: 0
+  })
 
   useEffect(() => {
     fetchClients()
-    fetchUnreadTotal()
+    fetchStats()
   }, [])
 
-  // 🔔 TOTAL PESAN BELUM DIBACA
-  const fetchUnreadTotal = async () => {
-    const { count } = await supabase
-      .from('messages')
-      .select('*', { count: 'exact', head: true })
-      .eq('sender', 'client')
-      .eq('is_read', false)
+  // === STATISTIK ADMIN ===
+  const fetchStats = async () => {
+    const today = new Date().toISOString().split('T')[0]
 
-    setUnreadTotal(count || 0)
+    const { data: allMessages } = await supabase
+      .from('messages')
+      .select('client_id, sender, is_read, created_at')
+
+    if (!allMessages) return
+
+    const uniqueClients = new Set(allMessages.map(m => m.client_id))
+    const unread = allMessages.filter(
+      m => m.sender === 'client' && m.is_read === false
+    )
+    const todayMsgs = allMessages.filter(
+      m => m.created_at.startsWith(today)
+    )
+
+    setStats({
+      totalClients: uniqueClients.size,
+      totalMessages: allMessages.length,
+      unreadMessages: unread.length,
+      todayMessages: todayMsgs.length
+    })
   }
 
-  // CLIENT LIST + JUMLAH UNREAD PER CLIENT
+  // === CLIENT LIST + UNREAD PER CLIENT ===
   const fetchClients = async () => {
     const { data } = await supabase
       .from('messages')
-      .select('client_id, is_read, sender')
+      .select('client_id, sender, is_read')
 
     if (!data) return
 
@@ -41,15 +62,12 @@ export default function AdminDashboard() {
       }
     })
 
-    const result = Object.entries(map).map(([id, unread]) => ({
-      id,
-      unread
-    }))
-
-    setClients(result)
+    setClients(
+      Object.entries(map).map(([id, unread]) => ({ id, unread }))
+    )
   }
 
-  // BUKA CHAT CLIENT
+  // === OPEN CHAT ===
   const fetchMessages = async (clientId) => {
     setSelectedClient(clientId)
 
@@ -61,7 +79,7 @@ export default function AdminDashboard() {
 
     setMessages(data || [])
 
-    // ✅ TANDAI SUDAH DIBACA
+    // tandai sudah dibaca
     await supabase
       .from('messages')
       .update({ is_read: true })
@@ -69,20 +87,19 @@ export default function AdminDashboard() {
       .eq('sender', 'client')
 
     fetchClients()
-    fetchUnreadTotal()
+    fetchStats()
   }
 
+  // === ADMIN REPLY ===
   const sendReply = async () => {
     if (!reply || !selectedClient) return
 
-    await supabase.from('messages').insert([
-      {
-        client_id: selectedClient,
-        sender: 'admin',
-        message: reply,
-        is_read: true
-      }
-    ])
+    await supabase.from('messages').insert({
+      client_id: selectedClient,
+      sender: 'admin',
+      message: reply,
+      is_read: true
+    })
 
     setReply('')
     fetchMessages(selectedClient)
@@ -90,16 +107,38 @@ export default function AdminDashboard() {
 
   return (
     <>
-      <AdminSidebar unread={unreadTotal} />
+      <AdminSidebar />
 
       <div className="admin-content">
-        <h2>SECURE CHAT PANEL</h2>
+        <h2>ADMIN DASHBOARD</h2>
 
-        <div style={{ display: 'flex' }}>
-          {/* CLIENT LIST */}
+        {/* === STAT BOX === */}
+        <div className="stats-grid">
+          <div className="stat-card">
+            <h3>{stats.totalClients}</h3>
+            <p>Total Clients</p>
+          </div>
+
+          <div className="stat-card">
+            <h3>{stats.totalMessages}</h3>
+            <p>Total Messages</p>
+          </div>
+
+          <div className="stat-card">
+            <h3>{stats.unreadMessages}</h3>
+            <p>Unread Messages</p>
+          </div>
+
+          <div className="stat-card">
+            <h3>{stats.todayMessages}</h3>
+            <p>Messages Today</p>
+          </div>
+        </div>
+
+        {/* === CHAT PANEL === */}
+        <div style={{ display: 'flex', marginTop: 20 }}>
           <div className="card" style={{ width: '30%' }}>
-            <h3>CLIENTS</h3>
-
+            <h3>Clients</h3>
             {clients.map(c => (
               <div
                 key={c.id}
@@ -114,17 +153,16 @@ export default function AdminDashboard() {
             ))}
           </div>
 
-          {/* CHAT */}
-          <div className="card" style={{ width: '70%', marginLeft: '15px' }}>
+          <div className="card" style={{ width: '70%', marginLeft: 15 }}>
             <div className="chat-box">
-              {messages.map(msg => (
+              {messages.map(m => (
                 <p
-                  key={msg.id}
-                  className={msg.sender === 'admin'
+                  key={m.id}
+                  className={m.sender === 'admin'
                     ? 'chat-admin'
                     : 'chat-client'}
                 >
-                  <strong>{msg.sender}:</strong> {msg.message}
+                  <strong>{m.sender}:</strong> {m.message}
                 </p>
               ))}
             </div>

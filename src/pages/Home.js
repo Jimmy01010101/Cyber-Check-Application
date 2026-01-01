@@ -1,20 +1,29 @@
+import UserNavbar from '../components/UserNavbar'
 import { useNavigate } from 'react-router-dom'
 
 export default function Home() {
   const navigate = useNavigate()
 
   return (
-    <div className="page">
-      <h1>Cyber-Check Service</h1>
-      <p>Security Testing & Vulnerability Assessment</p>
+    <>
+      <UserNavbar />
 
-      <button onClick={() => navigate('/packages')}>
-        Lihat Paket Keamanan
-      </button>
+      <div className="hero">
+        <h1>Secure Your System</h1>
+        <p>
+          Kami menguji, kamu tenang.<br />
+          Cyber Security Testing untuk Website & Aplikasi.
+        </p>
 
-      <button onClick={() => navigate('/chat')}>
-        Chat Admin
-      </button>
-    </div>
+        <div className="hero-action">
+          <button onClick={() => navigate('/packages')}>
+            🔍 Lihat Paket
+          </button>
+          <button onClick={() => navigate('/chat')}>
+            💬 Konsultasi
+          </button>
+        </div>
+      </div>
+    </>
   )
 }

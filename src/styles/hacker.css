@@ -318,3 +318,92 @@ canvas {
   margin: 5px 0;
   border-left: 3px solid #00ff88;
 }
+
+/* ===== USER NAVBAR ===== */
+.user-navbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 30px;
+  background: #050505;
+  border-bottom: 1px solid #00ff88;
+}
+
+.logo {
+  color: #00ff88;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.nav-menu button {
+  margin-left: 10px;
+}
+
+/* ===== HERO ===== */
+.hero {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.hero h1 {
+  font-size: 42px;
+  color: #00ff88;
+  animation: glow 2s infinite alternate;
+}
+
+.hero-action button {
+  margin: 10px;
+  padding: 12px 25px;
+}
+
+/* ===== PACKAGE CARD ===== */
+.package-card {
+  background: #080808;
+  border: 1px solid #00ff88;
+  padding: 20px;
+  transition: 0.3s;
+}
+
+.package-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 20px #00ff88;
+}
+
+.price {
+  display: block;
+  margin: 10px 0;
+  color: #00ff88;
+}
+
+/* ===== CHAT ===== */
+.chat-page {
+  max-width: 700px;
+  margin: auto;
+}
+
+.chat-box {
+  min-height: 300px;
+  padding: 15px;
+}
+
+.bubble {
+  max-width: 70%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 10px;
+}
+
+.bubble.client {
+  background: #003b2f;
+  align-self: flex-end;
+}
+
+.bubble.admin {
+  background: #111;
+  border-left: 3px solid #00ff88;
+}
+
+/* ===== ANIMATION ===== */
+@keyframes glow {
+  from { text-shadow: 0 0 5px #00ff88; }
+  to { text-shadow: 0 0 20px #00ff88; }
+}

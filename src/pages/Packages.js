@@ -1,3 +1,4 @@
+import UserNavbar from '../components/UserNavbar'
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabase'
 import { useNavigate } from 'react-router-dom'
@@ -7,37 +8,37 @@ export default function Packages() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    fetchPackages()
+    supabase.from('packages').select('*').then(res => {
+      setPackages(res.data || [])
+    })
   }, [])
 
-  const fetchPackages = async () => {
-    const { data } = await supabase.from('packages').select('*')
-    setPackages(data || [])
-  }
-
-  const orderPackage = (pkg) => {
-    // simpan paket yang dipilih
+  const order = (pkg) => {
     localStorage.setItem('selected_package', JSON.stringify(pkg))
     navigate('/chat')
   }
 
   return (
-    <div className="page">
-      <h2>Security Packages</h2>
+    <>
+      <UserNavbar />
 
-      <div className="package-grid">
-        {packages.map(pkg => (
-          <div key={pkg.id} className="card">
-            <h3>{pkg.name}</h3>
-            <p>{pkg.description}</p>
-            <strong>{pkg.price}</strong>
+      <div className="page">
+        <h2>🧪 Paket Keamanan</h2>
 
-            <button onClick={() => orderPackage(pkg)}>
-              Order Package
-            </button>
-          </div>
-        ))}
+        <div className="package-grid">
+          {packages.map(pkg => (
+            <div key={pkg.id} className="package-card">
+              <h3>{pkg.name}</h3>
+              <p>{pkg.description}</p>
+              <span className="price">{pkg.price}</span>
+
+              <button onClick={() => order(pkg)}>
+                Pesan Paket
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   )
 }

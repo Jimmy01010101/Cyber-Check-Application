@@ -1,29 +1,91 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { supabase } from '../supabase'
 import { getClientId } from '../utils/clientId'
 import { useNavigate } from 'react-router-dom'
 
 export default function Chat() {
   const navigate = useNavigate()
+  const clientId = getClientId()
 
+  // ===== STATE =====
+  const [messages, setMessages] = useState([])
+  const [newMessage, setNewMessage] = useState('')
+
+  // ===== AMBIL RIWAYAT PESAN =====
+  const fetchMessages = async () => {
+    const { data, error } = await supabase
+      .from('messages')
+      .select('*')
+      .eq('client_id', clientId)
+      .order('created_at', { ascending: true })
+
+    if (!error) {
+      setMessages(data)
+    } else {
+      console.error(error)
+    }
+  }
+
+  // ===== SIMPAN CLIENT & LOAD CHAT SAAT HALAMAN DIBUKA =====
   useEffect(() => {
-    const clientId = getClientId()
-    console.log('Client sedang chat dengan ID:', clientId)
+    // simpan client jika belum ada
+    supabase.from('clients').insert({ id: clientId }).then(() => {
+      // abaikan error duplicate (normal)
+    })
+
+    fetchMessages()
   }, [])
 
+  // ===== KIRIM PESAN =====
+  const sendMessage = async () => {
+    if (newMessage.trim() === '') return
+
+    await supabase.from('messages').insert({
+      client_id: clientId,
+      sender: 'client',
+      message: newMessage
+    })
+
+    setNewMessage('')
+    fetchMessages()
+  }
+
+  // ===== UI =====
   return (
-    <div>
+    <div style={{ maxWidth: '600px', margin: '20px auto' }}>
       <h2>Chat dengan Admin</h2>
 
-      <button onClick={() => navigate('/')}>
-        ← Kembali
-      </button>
+      <button onClick={() => navigate('/')}>← Kembali</button>
 
-      <div style={{ border: '1px solid #ccc', height: '200px', marginTop: '10px' }}>
-        <p>Admin: Selamat datang, silakan jelaskan kebutuhan Anda.</p>
+      <div
+        style={{
+          border: '1px solid #ccc',
+          height: '300px',
+          padding: '10px',
+          marginTop: '10px',
+          overflowY: 'auto'
+        }}
+      >
+        {messages.length === 0 && (
+          <p><i>Belum ada pesan</i></p>
+        )}
+
+        {messages.map(msg => (
+          <p key={msg.id}>
+            <strong>{msg.sender}:</strong> {msg.message}
+          </p>
+        ))}
       </div>
 
-      <input placeholder="Ketik pesan..." />
-      <button>Kirim</button>
+      <div style={{ marginTop: '10px' }}>
+        <input
+          style={{ width: '80%' }}
+          value={newMessage}
+          onChange={e => setNewMessage(e.target.value)}
+          placeholder="Ketik pesan..."
+        />
+        <button onClick={sendMessage}>Kirim</button>
+      </div>
     </div>
   )
 }

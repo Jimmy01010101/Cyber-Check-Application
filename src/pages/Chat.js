@@ -7,38 +7,48 @@ export default function Chat() {
   const navigate = useNavigate()
   const clientId = getClientId()
 
-  // ===== STATE =====
   const [messages, setMessages] = useState([])
   const [newMessage, setNewMessage] = useState('')
 
-  // ===== AMBIL RIWAYAT PESAN =====
+  // === LOAD CHAT ===
   const fetchMessages = async () => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('messages')
       .select('*')
       .eq('client_id', clientId)
       .order('created_at', { ascending: true })
 
-    if (!error) {
-      setMessages(data)
-    } else {
-      console.error(error)
-    }
+    setMessages(data || [])
   }
 
-  // ===== SIMPAN CLIENT & LOAD CHAT SAAT HALAMAN DIBUKA =====
+  // === REALTIME LISTENER ===
   useEffect(() => {
-    // simpan client jika belum ada
-    supabase.from('clients').insert({ id: clientId }).then(() => {
-      // abaikan error duplicate (normal)
-    })
-
     fetchMessages()
+
+    const channel = supabase
+      .channel('client-chat')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `client_id=eq.${clientId}`
+        },
+        () => {
+          fetchMessages()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [])
 
-  // ===== KIRIM PESAN =====
+  // === KIRIM PESAN ===
   const sendMessage = async () => {
-    if (newMessage.trim() === '') return
+    if (!newMessage.trim()) return
 
     await supabase.from('messages').insert({
       client_id: clientId,
@@ -47,45 +57,34 @@ export default function Chat() {
     })
 
     setNewMessage('')
-    fetchMessages()
   }
 
-  // ===== UI =====
   return (
-    <div style={{ maxWidth: '600px', margin: '20px auto' }}>
+    <div style={{ maxWidth: 600, margin: '20px auto' }}>
       <h2>Chat dengan Admin</h2>
-
       <button onClick={() => navigate('/')}>← Kembali</button>
 
-      <div
-        style={{
-          border: '1px solid #ccc',
-          height: '300px',
-          padding: '10px',
-          marginTop: '10px',
-          overflowY: 'auto'
-        }}
-      >
-        {messages.length === 0 && (
-          <p><i>Belum ada pesan</i></p>
-        )}
-
-        {messages.map(msg => (
-          <p key={msg.id}>
-            <strong>{msg.sender}:</strong> {msg.message}
+      <div style={{
+        border: '1px solid #ccc',
+        height: 300,
+        padding: 10,
+        overflowY: 'auto',
+        marginTop: 10
+      }}>
+        {messages.map(m => (
+          <p key={m.id}>
+            <strong>{m.sender}:</strong> {m.message}
           </p>
         ))}
       </div>
 
-      <div style={{ marginTop: '10px' }}>
-        <input
-          style={{ width: '80%' }}
-          value={newMessage}
-          onChange={e => setNewMessage(e.target.value)}
-          placeholder="Ketik pesan..."
-        />
-        <button onClick={sendMessage}>Kirim</button>
-      </div>
+      <input
+        value={newMessage}
+        onChange={e => setNewMessage(e.target.value)}
+        placeholder="Ketik pesan..."
+        style={{ width: '80%' }}
+      />
+      <button onClick={sendMessage}>Kirim</button>
     </div>
   )
 }

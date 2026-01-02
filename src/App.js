@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 import './styles/hacker.css'
+import Footer from './components/Footer'
 
 import Home from './pages/Home'
 import Chat from './pages/Chat'
@@ -13,8 +14,8 @@ import ProtectedRoute from './components/ProtectedRoute'
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
 
+      <Routes>
         {/* ===== PUBLIC ===== */}
         <Route path="/" element={<Home />} />
         <Route path="/packages" element={<Packages />} />
@@ -41,8 +42,11 @@ function App() {
             </ProtectedRoute>
           }
         />
-
       </Routes>
+
+      {/* ===== GLOBAL FOOTER ===== */}
+      <Footer />
+
     </BrowserRouter>
   )
 }

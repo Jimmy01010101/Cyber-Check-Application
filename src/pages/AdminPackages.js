@@ -4,14 +4,16 @@ import AdminSidebar from '../components/AdminSidebar'
 
 export default function AdminPackages() {
   const [packages, setPackages] = useState([])
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [price, setPrice] = useState('')
+  const [form, setForm] = useState({
+    id: null,
+    name: '',
+    description: '',
+    price: ''
+  })
 
-  useEffect(() => {
-    fetchPackages()
-  }, [])
-
+  // ===============================
+  // LOAD PACKAGES
+  // ===============================
   const fetchPackages = async () => {
     const { data } = await supabase
       .from('packages')
@@ -21,16 +23,82 @@ export default function AdminPackages() {
     setPackages(data || [])
   }
 
+  useEffect(() => {
+    fetchPackages()
+  }, [])
+
+  // ===============================
+  // HANDLE INPUT
+  // ===============================
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value
+    })
+  }
+
+  // ===============================
+  // CREATE / UPDATE
+  // ===============================
   const savePackage = async () => {
-    if (!name || !description || !price) return
+    if (!form.name) {
+      alert('Nama paket wajib diisi')
+      return
+    }
 
-    await supabase.from('packages').insert([
-      { name, description, price }
-    ])
+    const payload = {
+      name: form.name,
+      description: form.description,
+      price: form.price
+    }
 
-    setName('')
-    setDescription('')
-    setPrice('')
+    if (form.id) {
+      // UPDATE
+      await supabase
+        .from('packages')
+        .update(payload)
+        .eq('id', form.id)
+    } else {
+      // CREATE
+      await supabase
+        .from('packages')
+        .insert(payload)
+    }
+
+    setForm({
+      id: null,
+      name: '',
+      description: '',
+      price: ''
+    })
+
+    fetchPackages()
+  }
+
+  // ===============================
+  // EDIT
+  // ===============================
+  const editPackage = (pkg) => {
+    setForm({
+      id: pkg.id,
+      name: pkg.name || '',
+      description: pkg.description || '',
+      price: pkg.price || ''
+    })
+  }
+
+  // ===============================
+  // DELETE
+  // ===============================
+  const deletePackage = async (id) => {
+    const ok = window.confirm('Hapus paket ini?')
+    if (!ok) return
+
+    await supabase
+      .from('packages')
+      .delete()
+      .eq('id', id)
+
     fetchPackages()
   }
 
@@ -38,42 +106,57 @@ export default function AdminPackages() {
     <>
       <AdminSidebar />
 
+      {/* ⚠️ CLASS INI TIDAK DIUBAH (AMAN CSS) */}
       <div className="admin-content">
-        <h2>SECURITY PACKAGES</h2>
+        <h2>Manajemen Paket Keamanan</h2>
 
-        {/* FORM */}
+        {/* ================= FORM ================= */}
         <div className="card">
+          <h3>{form.id ? 'Edit Paket' : 'Tambah Paket'}</h3>
+
           <input
-            placeholder="Package name"
-            value={name}
-            onChange={e => setName(e.target.value)}
+            name="name"
+            placeholder="Nama Paket"
+            value={form.name}
+            onChange={handleChange}
           />
 
           <textarea
-            placeholder="Description"
-            value={description}
-            onChange={e => setDescription(e.target.value)}
+            name="description"
+            placeholder="Deskripsi Paket"
+            value={form.description}
+            onChange={handleChange}
           />
 
           <input
-            placeholder="Price"
-            value={price}
-            onChange={e => setPrice(e.target.value)}
+            name="price"
+            placeholder="Harga"
+            value={form.price}
+            onChange={handleChange}
           />
 
-          <button onClick={savePackage} style={{ marginTop: '10px' }}>
-            SAVE
+          <button onClick={savePackage}>
+            {form.id ? 'Update' : 'Simpan'}
           </button>
         </div>
 
-        {/* LIST */}
-        {packages.map(pkg => (
-          <div key={pkg.id} className="card">
-            <h3>{pkg.name}</h3>
-            <p>{pkg.description}</p>
-            <strong>{pkg.price}</strong>
-          </div>
-        ))}
+        {/* ================= LIST ================= */}
+        <div className="card">
+          <h3>Daftar Paket</h3>
+
+          {packages.map(p => (
+            <div key={p.id} className="package-item">
+              <strong>{p.name}</strong>
+              <div>{p.description}</div>
+              <div>Harga: {p.price}</div>
+
+              <div className="actions">
+                <button onClick={() => editPackage(p)}>Edit</button>
+                <button onClick={() => deletePackage(p.id)}>Hapus</button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </>
   )

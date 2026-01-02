@@ -123,7 +123,7 @@ export default function Chat() {
         <div className="chat-box">
           {messages.length === 0 && (
             <div className="empty-chat">
-              👋 Halo! Silakan mulai chat dengan admin.
+              👋 Halo! Silakan konsultasi keamanan sistem anda dengan admin kami.
             </div>
           )}
 

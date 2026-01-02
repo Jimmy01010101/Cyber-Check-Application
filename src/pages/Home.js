@@ -11,16 +11,16 @@ export default function Home() {
       <div className="hero">
         <h1>Secure Your System</h1>
         <p>
-          Kami menguji, kamu tenang.<br />
-          Cyber Security Testing untuk Website & Aplikasi.
+Kami hadir sebagai penyedia layanan keamanan siber (Cyber Security Services) yang berfokus pada pencegahan, pendeteksian, dan penanganan ancaman digital secara profesional, terstruktur, dan etis.
+Setiap layanan dirancang berdasarkan pendekatan risk-based security dengan tujuan memastikan kerahasiaan (confidentiality), integritas (integrity), dan ketersediaan (availability) sistem Anda.
         </p>
 
         <div className="hero-action">
           <button onClick={() => navigate('/packages')}>
-            🔍 Lihat Paket
+            Lihat Paket
           </button>
           <button onClick={() => navigate('/chat')}>
-            💬 Konsultasi
+            Konsultasi
           </button>
         </div>
       </div>

@@ -23,7 +23,7 @@ export default function Packages() {
       <UserNavbar />
 
       <div className="page">
-        <h2>🧪 Paket Keamanan</h2>
+        <h2></h2>
 
         <div className="package-grid">
           {packages.map(pkg => (
@@ -33,7 +33,7 @@ export default function Packages() {
               <span className="price">{pkg.price}</span>
 
               <button onClick={() => order(pkg)}>
-                Pesan Paket
+                Order Now
               </button>
             </div>
           ))}
